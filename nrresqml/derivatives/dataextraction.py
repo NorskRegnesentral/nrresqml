@@ -49,7 +49,15 @@ def extract_geometry(rq: ResQml, flatten_pillars: bool, indexing: str):
     pillars = _extract_dataset(rq, ijk.Geometry.Points.ParametricLines.ControlPointParameters.Values)
     assert isinstance(ijk.Geometry.Points.ParametricLines.ControlPoints, Point3dHdf5Array)
     xxyyzz = _extract_dataset(rq, ijk.Geometry.Points.ParametricLines.ControlPoints.Coordinates)
-    xx, yy = xxyyzz[:, :, :, 0], xxyyzz[:, :, :, 1]
+    if xxyyzz.ndim == 3:
+        # This is technically an outdated format, but is supported nonetheless
+        xx, yy = xxyyzz[:, :, 0], xxyyzz[:, :, 1]
+        # Pillars are technically already flattened when this format is used, as the outdated format did not support
+        # a non-flattened format. The primary purpose of the new format was to support this types of pillars.
+        flatten_pillars = False
+    else:
+        assert xxyyzz.ndim == 4
+        xx, yy = xxyyzz[:, :, :, 0], xxyyzz[:, :, :, 1]
     if flatten_pillars:
         xx = xx[0, :, :]
         yy = yy[0, :, :]
@@ -82,4 +90,5 @@ def _extract_dataset(resqml: ResQml, hdf5_dataset: Hdf5Dataset):
     hdf5_path = resqml.get_full_hdf5_reference(hdf5_dataset.HdfProxy)
     h5ds = h5py.File(hdf5_path, mode='r')
     hdf5_path = hdf5_dataset.PathInHdfFile
-    return h5ds[hdf5_path]
+    # Convert to ndarray. This yields easier-to-read error message if something goes wrong with indexing (or similar)
+    return np.array(h5ds[hdf5_path])
