@@ -41,7 +41,6 @@ def _open_delft3d_path(p: str) -> Union[h5py.File, DatasetType]:
 
 
 class Delft3DResQmlAdaptor(Hdf5ResQmlAdaptor):
-    # TODO: implement proper mapping and move definitions somewhere else
     _archel_map = {
         0: 'Inactive',
         1: 'Active Channel',
@@ -59,9 +58,9 @@ class Delft3DResQmlAdaptor(Hdf5ResQmlAdaptor):
     }
     # HDF5 keys
     _delft3d_archel_key = 'archel'
-    _delft3d_subenv_key = 'subenvironment'
+    _delft3d_subenv_key = 'subenv'
     _resqml_archel_key = 'archel'
-    _resqml_subenv_key = 'subenvironment'
+    _resqml_subenv_key = 'subenv'
     # Continuous attributes and their natural bounds. We can compute the bounds per data set, but it is not obvious from
     # the ResQML specification that it is required. Instead, we choose to use some natural bounds based on what the
     # properties represents. This can save a significant amount of computation time.
